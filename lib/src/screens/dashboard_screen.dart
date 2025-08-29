@@ -147,13 +147,4 @@ class DashboardScreen extends StatelessWidget {
         ],
       );
 
-  Widget _userView() => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text('User Dashboard', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          SizedBox(height: 12),
-          Text('• View your profile'),
-+          Text('• Browse content'),
-        ],
-      );
 }
