@@ -16,9 +16,23 @@ jobs:
   build-apk:
     name: Build release APK
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Find Flutter project root
+        run: |
+          echo "Looking for pubspec.yaml..."
+          P=$(find . -name pubspec.yaml -print -quit | xargs -r dirname || true)
+          if [ -z "$P" ]; then
+            echo "No pubspec.yaml found; defaulting to repo root"
+            P='.'
+          fi
+          echo "PROJECT_DIR=$P" >> $GITHUB_ENV
+          echo "Project dir set to: $P"
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -40,16 +54,22 @@ jobs:
           ls -la ${{ runner.temp }} || true
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          echo "Using PROJECT_DIR=$PROJECT_DIR"
+          cd "$PROJECT_DIR"
+          flutter pub get
 
       - name: Build debug APK
-        run: flutter build apk --debug
+        run: |
+          echo "Using PROJECT_DIR=$PROJECT_DIR"
+          cd "$PROJECT_DIR"
+          flutter build apk --debug
 
       - name: Upload Debug APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          path: '**/app-debug.apk'
 
 # Notes:
 # - If you want reproducible builds, pin FLUTTER_VERSION to a specific published version (recommended).
