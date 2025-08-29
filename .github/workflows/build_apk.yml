@@ -110,9 +110,25 @@ jobs:
           if [ -d android ]; then
             echo "android/ already exists"
           else
-            echo "android/ missing — running 'flutter create -t app .' to generate platform folders"
-            flutter create -t app .
-            echo "Generated platform folders"
+            echo "android/ missing — will run 'flutter create -t app .' to generate platform folders"
+            # Prefer project name from pubspec.yaml if present
+            PROJECT_NAME=""
+            if [ -f pubspec.yaml ]; then
+              PROJECT_NAME=$(grep '^name:' pubspec.yaml | head -n1 | awk '{print $2}' || true)
+            fi
+            if [ -z "$PROJECT_NAME" ]; then
+              PROJECT_NAME=$(basename "$(pwd)")
+            fi
+            # sanitize: replace hyphens and invalid chars with underscore, lowercase
+            PROJECT_NAME=${PROJECT_NAME//-/_}
+            PROJECT_NAME=$(echo "$PROJECT_NAME" | sed 's/[^a-zA-Z0-9_]/_/g' | tr '[:upper:]' '[:lower:]')
+            # ensure it doesn't start with a digit
+            if echo "$PROJECT_NAME" | grep -q '^[0-9]'; then
+              PROJECT_NAME="app_$PROJECT_NAME"
+            fi
+            echo "Using project name: $PROJECT_NAME"
+            flutter create -t app . --project-name "$PROJECT_NAME"
+            echo "Generated platform folders with project name: $PROJECT_NAME"
           fi
 
       - name: Verify project layout and Install dependencies
