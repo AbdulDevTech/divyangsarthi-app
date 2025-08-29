@@ -36,7 +36,9 @@ class _LoginScreenState extends State<LoginScreen> {
         final user = result['user'] as Map<String, dynamic>?;
         final role = user != null && user['role'] != null ? user['role'].toString() : 'user';
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login success. Role: $role')));
-        // intentionally do NOT navigate to dashboard — keep user on login screen so logs can be inspected
+        // navigate to dashboard now that login succeeded
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => DashboardScreen(role: role)));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Login failed: no token')));
       }
