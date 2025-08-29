@@ -6,15 +6,6 @@ on:
   workflow_dispatch:
 
 env:
-  FLUTTER_CHANNEL: 'stable'
-name: Build APK
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-env:
   # Recommended: pin a concrete Flutter SDK to avoid resolution problems.
   # Update this value to a specific version when you want reproducible builds.
   FLUTTER_VERSION: '3.13.0' # <- change to a specific version compatible with your project
@@ -41,7 +32,7 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           # cache: true  # uncomment to enable action caching of Flutter SDK (can speed up runs)
 
-      - name: Debug: show installed flutter and env
+      - name: "Debug: show installed flutter and env"
         run: |
           echo "FLUTTER_VERSION=${{ env.FLUTTER_VERSION }}"
           flutter --version || true
@@ -51,14 +42,14 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build release APK (unsigned)
-        run: flutter build apk --release --no-shrink
+      - name: Build debug APK
+        run: flutter build apk --debug
 
-      - name: Upload APK artifact
+      - name: Upload Debug APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: app-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
 
 # Notes:
 # - If you want reproducible builds, pin FLUTTER_VERSION to a specific published version (recommended).
