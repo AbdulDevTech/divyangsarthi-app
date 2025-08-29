@@ -98,6 +98,11 @@ class ApiClient {
       if (token != null && token.isNotEmpty) {
         await _safeWrite('access_token', token);
       }
+      // persist refresh token if backend returned it inside user map
+      final refresh = user != null ? (user['refresh_token'] ?? user['refreshToken'] ?? user['refresh']) : null;
+      if (refresh != null && refresh.toString().isNotEmpty) {
+        await _safeWrite('refresh_token', refresh.toString());
+      }
       return {'token': token, 'user': user};
     }
     throw Exception('Login failed: ${response.statusCode}');

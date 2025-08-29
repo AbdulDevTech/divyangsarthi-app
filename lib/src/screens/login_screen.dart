@@ -33,9 +33,12 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Login failed: no token')));
       }
-    } catch (e) {
+    } catch (e, st) {
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login error: $e')));
+      // log full error and stacktrace to help diagnose NotInitializedError
+      debugPrint('Login error: $e');
+      debugPrint('$st');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login error: ${e.runtimeType}: ${e.toString()}')));
     }
   }
 
