@@ -68,6 +68,18 @@ jobs:
             rm -f "$PROJECT_DIR/.env.tmp" || true
           fi
 
+      - name: Ensure .env exists
+        run: |
+          echo "PROJECT_DIR=$PROJECT_DIR"
+          if [ ! -f "$PROJECT_DIR/.env" ]; then
+            echo "No .env found; creating an empty .env at $PROJECT_DIR/.env"
+            # create an empty .env file
+            : > "$PROJECT_DIR/.env"
+            echo "Created empty .env"
+          else
+            echo ".env already exists at $PROJECT_DIR/.env"
+          fi
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
