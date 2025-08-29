@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,12 +13,16 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _loading = false;
 
+  bool get _canSubmit => _emailController.text.isNotEmpty && _passwordController.text.isNotEmpty && !_loading;
+
   void _login() async {
+    if (!_canSubmit) return;
     setState(() => _loading = true);
-    await Future.delayed(const Duration(seconds: 1)); // stub
+    await Future.delayed(const Duration(seconds: 1)); // stub: replace with real auth
     setState(() => _loading = false);
-    // TODO: call API client and navigate to home on success
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Login flow not implemented')));
+    // navigate to home
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
   }
 
   @override
@@ -35,11 +40,17 @@ class _LoginScreenState extends State<LoginScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email')),
+            TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email'), onChanged: (_) => setState(() {})),
             const SizedBox(height: 8),
-            TextField(controller: _passwordController, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),
+            TextField(controller: _passwordController, decoration: const InputDecoration(labelText: 'Password'), obscureText: true, onChanged: (_) => setState(() {})),
             const SizedBox(height: 16),
-            ElevatedButton(onPressed: _loading ? null : _login, child: _loading ? const CircularProgressIndicator() : const Text('Login')),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _canSubmit ? _login : null,
+                child: _loading ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Login'),
+              ),
+            ),
           ],
         ),
       ),
