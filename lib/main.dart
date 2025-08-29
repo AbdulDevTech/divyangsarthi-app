@@ -5,6 +5,20 @@ import 'src/app.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(); // loads .env (or .env.sample if you copy/rename)
-  runApp(const ProviderScope(child: DivyangsarthiApp()));
+  try {
+    // safe dotenv load: don't fail the app if .env is missing or invalid
+    await dotenv.load();
+    debugPrint('Loaded .env successfully');
+  } catch (e, st) {
+    debugPrint('dotenv.load() failed: $e');
+    debugPrint('$st');
+  }
+
+  // Run the app inside a guarded zone to catch errors early
+  runZonedGuarded(() {
+    runApp(const ProviderScope(child: DivyangsarthiApp()));
+  }, (error, stack) {
+    debugPrint('Uncaught error in runZonedGuarded: $error');
+    debugPrint('$stack');
+  });
 }

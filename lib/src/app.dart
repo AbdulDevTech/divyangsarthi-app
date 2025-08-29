@@ -11,13 +11,8 @@ class DivyangsarthiApp extends StatelessWidget {
     return MaterialApp(
       title: 'Divyangsarthi',
       theme: ThemeData(primarySwatch: Colors.blue),
-      initialRoute: '/',
-      routes: {
-        '/': (c) => const SplashScreen(),
-        '/login': (c) => const LoginScreen(),
-        '/home': (c) => const HomeScreen(),
-        // TODO: add /profile, /students, /media routes
-      },
+      // for debugging, use home directly to avoid route registration issues
+      home: const SplashScreen(),
     );
   }
 }
