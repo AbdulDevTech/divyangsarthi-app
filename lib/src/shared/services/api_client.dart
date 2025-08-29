@@ -1,18 +1,24 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ApiClient {
   final Dio _dio;
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  FlutterSecureStorage? _storage;
+  final Map<String, String> _inMemoryStore = {};
 
   ApiClient._internal(this._dio) {
     _dio.options.baseUrl = dotenv.env['API_BASE_URL'] ?? 'https://backend.divyangsarthi.in';
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
-        final token = await _storage.read(key: 'access_token');
-        if (token != null && token.isNotEmpty) {
-          options.headers['x-access-token'] = token;
+        try {
+          final token = await _safeRead('access_token');
+          if (token != null && token.isNotEmpty) {
+            options.headers['x-access-token'] = token;
+          }
+        } catch (e) {
+          // don't block the request on storage failures; continue without token
         }
         return handler.next(options);
       },
@@ -21,6 +27,47 @@ class ApiClient {
         return handler.next(err);
       },
     ));
+  }
+
+  Future<void> _ensureStorage() async {
+    if (_storage != null) return;
+    try {
+      // On web flutter_secure_storage isn't supported; keep in-memory fallback
+      if (kIsWeb) return;
+      _storage = const FlutterSecureStorage();
+    } catch (_) {
+      // ignore and rely on in-memory store
+    }
+  }
+
+  Future<void> _safeWrite(String key, String? value) async {
+    await _ensureStorage();
+    try {
+      if (_storage != null) {
+        await _storage!.write(key: key, value: value);
+        return;
+      }
+    } catch (_) {
+      // fallthrough to in-memory
+    }
+    if (value == null) {
+      _inMemoryStore.remove(key);
+    } else {
+      _inMemoryStore[key] = value;
+    }
+  }
+
+  Future<String?> _safeRead(String key) async {
+    await _ensureStorage();
+    try {
+      if (_storage != null) {
+        final v = await _storage!.read(key: key);
+        if (v != null) return v;
+      }
+    } catch (_) {
+      // ignore and fallback
+    }
+    return _inMemoryStore[key];
   }
 
   static ApiClient create() {
@@ -41,15 +88,15 @@ class ApiClient {
   /// Attempt login with email and password. If successful, saves access_token
   /// into secure storage and returns the token string.
   /// Returns a map with keys: 'token' (String?) and 'user' (Map?) on success.
-  Future<Map<String, dynamic>?> login(String email, String password) async {
-    final response = await post('/users/public/login', data: {'email': email, 'password': password});
+  Future<Map<String, dynamic>?> login(String emailOrPhone, String password) async {
+    final response = await post('/users/public/login', data: {'emailorphone': emailOrPhone, 'password': password});
     if (response.statusCode == 200) {
       final data = response.data;
       final parsed = _parseAuthResponse(data);
       final token = parsed['token'] as String?;
       final user = parsed['user'] as Map<String, dynamic>?;
       if (token != null && token.isNotEmpty) {
-        await _storage.write(key: 'access_token', value: token);
+        await _safeWrite('access_token', token);
       }
       return {'token': token, 'user': user};
     }
@@ -67,7 +114,7 @@ class ApiClient {
       final token = parsed['token'] as String?;
       final user = parsed['user'] as Map<String, dynamic>?;
       if (token != null && token.isNotEmpty) {
-        await _storage.write(key: 'access_token', value: token);
+        await _safeWrite('access_token', token);
       }
       return {'token': token, 'user': user};
     }
@@ -83,13 +130,8 @@ class ApiClient {
       // token may be under different keys (snake_case or camelCase)
       token = (data['access_token'] ?? data['accessToken'] ?? data['token'])?.toString();
 
-      // refresh token if present
+      // refresh token if present (collect now, merge later)
       final refresh = (data['refresh_token'] ?? data['refreshToken'])?.toString();
-      if (refresh != null && refresh.isNotEmpty) {
-        // save under a normalized key if present
-        user ??= <String, dynamic>{};
-        user['refresh_token'] = refresh;
-      }
 
       // Common locations for user/role
       if (data['user'] is Map<String, dynamic>) {
@@ -113,6 +155,12 @@ class ApiClient {
           if (data.containsKey(k)) candidate[k] = data[k];
         }
         if (candidate.isNotEmpty) user = candidate;
+      }
+
+      // Merge refresh token into user map if available
+      if (refresh != null && refresh.isNotEmpty) {
+        user ??= <String, dynamic>{};
+        user['refresh_token'] = refresh;
       }
     }
 

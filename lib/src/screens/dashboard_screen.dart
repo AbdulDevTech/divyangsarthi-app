@@ -12,19 +12,19 @@ class DashboardScreen extends StatelessWidget {
       case 'admin':
         body = _adminView();
         break;
-      case 'institute':
+      case 'Anstitute':
         body = _instituteView();
         break;
-      case 'educator':
+      case 'Educator':
         body = _educatorView();
         break;
-      case 'individualeducator':
+      case 'Individualeducator':
         body = _individualEducatorView();
         break;
-      case 'parent':
+      case 'Parent':
         body = _parentView();
         break;
-      case 'student':
+      case 'Student':
         body = _studentView();
         break;
       default:
@@ -32,9 +32,20 @@ class DashboardScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text('Dashboard - ${role[0].toUpperCase()}${role.substring(1)}')),
+      appBar: AppBar(title: Text('Dashboard - ${_displayRole(role)}')),
       body: Padding(padding: const EdgeInsets.all(16.0), child: body),
     );
+  }
+
+  String _displayRole(String r) {
+    final trimmed = r.trim();
+    if (trimmed.isEmpty) return '';
+    final parts = trimmed.split(RegExp(r'[_\-\s]+'));
+    final words = parts.map((p) {
+      if (p.isEmpty) return '';
+      return '${p[0].toUpperCase()}${p.substring(1)}';
+    }).where((w) => w.isNotEmpty).toList();
+    return words.join('');
   }
 
   Widget _adminView() => Column(
@@ -112,12 +123,12 @@ class DashboardScreen extends StatelessWidget {
     switch (key) {
       case 'admin':
         return 'admin';
-      case 'institute':
+      case 'Institute':
       case 'organisation':
       case 'organization':
-        return 'institute';
+        return 'Institute';
       case 'educator':
-        return 'educator';
+        return 'Educator';
       case 'individualeducator':
       case 'individual_educator':
       case 'individual-educator':

@@ -54,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email'), onChanged: (_) => setState(() {})),
+            TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email or phone'), onChanged: (_) => setState(() {})),
             const SizedBox(height: 8),
             TextField(controller: _passwordController, decoration: const InputDecoration(labelText: 'Password'), obscureText: true, onChanged: (_) => setState(() {})),
             const SizedBox(height: 16),
