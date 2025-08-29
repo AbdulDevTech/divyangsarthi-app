@@ -10,7 +10,7 @@ class ApiClient {
   final Map<String, String> _inMemoryStore = {};
 
   ApiClient._internal(this._dio) {
-    _dio.options.baseUrl = dotenv.env['API_BASE_URL'] ?? 'https://backend.divyangsarthi.in';
+    _dio.options.baseUrl = 'https://backend.divyangsarthi.in';
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         // attach token if available
