@@ -146,6 +146,12 @@ jobs:
           echo "First 30 lines of pubspec.yaml (if present):"; sed -n '1,30p' pubspec.yaml || true
           flutter pub get
 
+      - name: Ensure Android manifest & SDK settings
+        working-directory: ${{ steps.find.outputs.project_dir }}
+        run: |
+          chmod +x $GITHUB_WORKSPACE/.github/scripts/ensure_android.sh || true
+          $GITHUB_WORKSPACE/.github/scripts/ensure_android.sh "${{ steps.find.outputs.project_dir }}"
+
       - name: Verify build dir and Build debug APK
         working-directory: ${{ steps.find.outputs.project_dir }}
         run: |
