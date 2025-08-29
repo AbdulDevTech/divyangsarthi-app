@@ -24,6 +24,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Find Flutter project root
+        id: find
         run: |
           echo "Looking for pubspec.yaml in common locations..."
           if [ -f ./pubspec.yaml ]; then
@@ -43,41 +44,44 @@ jobs:
             P='.'
           fi
           echo "PROJECT_DIR=$P" >> $GITHUB_ENV
+          echo "project_dir=$P" >> $GITHUB_OUTPUT
           echo "Project dir set to: $P"
 
       - name: Copy .env.sample to .env (if present)
         run: |
-          echo "PROJECT_DIR=$PROJECT_DIR"
+          TARGET_DIR="${{ steps.find.outputs.project_dir }}"
+          echo "TARGET_DIR=$TARGET_DIR"
           if [ -f "$GITHUB_WORKSPACE/.env.sample" ]; then
-            echo "Found .env.sample at repo root; copying to $PROJECT_DIR/.env"
-            cp "$GITHUB_WORKSPACE/.env.sample" "$PROJECT_DIR/.env"
-            echo "Copied .env.sample to $PROJECT_DIR/.env"
+            echo "Found .env.sample at repo root; copying to $TARGET_DIR/.env"
+            cp "$GITHUB_WORKSPACE/.env.sample" "$TARGET_DIR/.env"
+            echo "Copied .env.sample to $TARGET_DIR/.env"
           else
             echo ".env.sample not found in repo root; skipping"
           fi
 
       - name: Populate .env from GitHub Secret (if set)
         run: |
-          echo "PROJECT_DIR=$PROJECT_DIR"
-          echo "${{ secrets.divyangsarthi_codebase }}" > "$PROJECT_DIR/.env.tmp" || true
-          if [ -s "$PROJECT_DIR/.env.tmp" ]; then
-            mv "$PROJECT_DIR/.env.tmp" "$PROJECT_DIR/.env"
-            echo "Wrote secret to $PROJECT_DIR/.env"
+          TARGET_DIR="${{ steps.find.outputs.project_dir }}"
+          echo "TARGET_DIR=$TARGET_DIR"
+          echo "${{ secrets.divyangsarthi_codebase }}" > "$TARGET_DIR/.env.tmp" || true
+          if [ -s "$TARGET_DIR/.env.tmp" ]; then
+            mv "$TARGET_DIR/.env.tmp" "$TARGET_DIR/.env"
+            echo "Wrote secret to $TARGET_DIR/.env"
           else
             echo "GitHub secret 'divyangsarthi_codebase' not set or empty; skipping"
-            rm -f "$PROJECT_DIR/.env.tmp" || true
+            rm -f "$TARGET_DIR/.env.tmp" || true
           fi
 
       - name: Ensure .env exists
         run: |
-          echo "PROJECT_DIR=$PROJECT_DIR"
-          if [ ! -f "$PROJECT_DIR/.env" ]; then
-            echo "No .env found; creating an empty .env at $PROJECT_DIR/.env"
-            # create an empty .env file
-            : > "$PROJECT_DIR/.env"
+          TARGET_DIR="${{ steps.find.outputs.project_dir }}"
+          echo "TARGET_DIR=$TARGET_DIR"
+          if [ ! -f "$TARGET_DIR/.env" ]; then
+            echo "No .env found; creating an empty .env at $TARGET_DIR/.env"
+            : > "$TARGET_DIR/.env"
             echo "Created empty .env"
           else
-            echo ".env already exists at $PROJECT_DIR/.env"
+            echo ".env already exists at $TARGET_DIR/.env"
           fi
 
       - name: Setup Java
@@ -99,16 +103,29 @@ jobs:
           which flutter || true
           ls -la ${{ runner.temp }} || true
 
-      - name: Install dependencies
+      - name: Verify project layout and Install dependencies
+        working-directory: ${{ steps.find.outputs.project_dir }}
         run: |
-          echo "Using PROJECT_DIR=$PROJECT_DIR"
-          cd "$PROJECT_DIR"
+          set -x
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+          echo "Current pwd: $(pwd)"
+          echo "Real path pwd: $(realpath .)"
+          echo "Real path target: $(realpath '${{ steps.find.outputs.project_dir }}')" || true
+          echo "Listing current dir:"; ls -la
+          echo "Listing workspace root:"; ls -la $GITHUB_WORKSPACE || true
+          echo "Checking for pubspec.yaml in current dir:"; if [ -f pubspec.yaml ]; then echo "FOUND pubspec.yaml"; else echo "MISSING pubspec.yaml"; fi
+          echo "Stat pubspec.yaml (if present):"; stat pubspec.yaml || true
+          echo "First 30 lines of pubspec.yaml (if present):"; sed -n '1,30p' pubspec.yaml || true
           flutter pub get
 
-      - name: Build debug APK
+      - name: Verify build dir and Build debug APK
+        working-directory: ${{ steps.find.outputs.project_dir }}
         run: |
-          echo "Using PROJECT_DIR=$PROJECT_DIR"
-          cd "$PROJECT_DIR"
+          set -x
+          echo "pwd: $(pwd)"
+          echo "Listing project dir:"; ls -la
+          echo "Listing android dir (if any):"; ls -la android || true
+          echo "Listing build output dir (pre-build):"; ls -la build || true
           flutter build apk --debug
 
       - name: Upload Debug APK artifact
