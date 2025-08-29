@@ -103,6 +103,18 @@ jobs:
           which flutter || true
           ls -la ${{ runner.temp }} || true
 
+      - name: Ensure Flutter platform directories (android/ios) exist
+        working-directory: ${{ steps.find.outputs.project_dir }}
+        run: |
+          echo "Checking for android/ in $(pwd)"
+          if [ -d android ]; then
+            echo "android/ already exists"
+          else
+            echo "android/ missing — running 'flutter create -t app .' to generate platform folders"
+            flutter create -t app .
+            echo "Generated platform folders"
+          fi
+
       - name: Verify project layout and Install dependencies
         working-directory: ${{ steps.find.outputs.project_dir }}
         run: |
