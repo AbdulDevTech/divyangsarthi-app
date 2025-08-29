@@ -43,7 +43,7 @@ jobs:
       - name: Setup Flutter (subosito/flutter-action@v2) - pinned version
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          flutter-version: '3.13.0'
           # cache: true  # uncomment to enable action caching of Flutter SDK (can speed up runs)
 
       - name: "Debug: show installed flutter and env"
