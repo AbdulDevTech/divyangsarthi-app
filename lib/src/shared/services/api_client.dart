@@ -1,7 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:developer' show log;
 
 class ApiClient {
   final Dio _dio;
@@ -24,9 +25,9 @@ class ApiClient {
 
         // Log request details for debugging (payload, headers)
         try {
-          debugPrint('API Request --> ${options.method.toUpperCase()} ${options.uri.toString()}');
-          debugPrint('Request headers: ${options.headers}');
-          debugPrint('Request data: ${options.data}');
+          log('API Request --> ${options.method.toUpperCase()} ${options.uri.toString()}', name: 'ApiClient');
+          log('Request headers: ${options.headers}', name: 'ApiClient');
+          log('Request data: ${options.data}', name: 'ApiClient');
         } catch (_) {}
 
         return handler.next(options);
@@ -34,9 +35,9 @@ class ApiClient {
       onResponse: (response, handler) async {
         // Log response details
         try {
-          debugPrint('API Response <-- ${response.requestOptions.method.toUpperCase()} ${response.requestOptions.uri.toString()}');
-          debugPrint('Status: ${response.statusCode}');
-          debugPrint('Response data: ${response.data}');
+          log('API Response <-- ${response.requestOptions.method.toUpperCase()} ${response.requestOptions.uri.toString()}', name: 'ApiClient');
+          log('Status: ${response.statusCode}', name: 'ApiClient');
+          log('Response data: ${response.data}', name: 'ApiClient');
         } catch (_) {}
         return handler.next(response);
       },
@@ -44,11 +45,11 @@ class ApiClient {
         // Log error details
         try {
           final req = err.requestOptions;
-          debugPrint('API Error XX ${req.method.toUpperCase()} ${req.uri.toString()}');
-          debugPrint('Error message: ${err.message}');
+          log('API Error XX ${req.method.toUpperCase()} ${req.uri.toString()}', name: 'ApiClient');
+          log('Error message: ${err.message}', name: 'ApiClient');
           if (err.response != null) {
-            debugPrint('Error status: ${err.response?.statusCode}');
-            debugPrint('Error response data: ${err.response?.data}');
+            log('Error status: ${err.response?.statusCode}', name: 'ApiClient');
+            log('Error response data: ${err.response?.data}', name: 'ApiClient');
           }
         } catch (_) {}
         // TODO: implement refresh token flow using users/public/getaccesstoken
@@ -117,23 +118,34 @@ class ApiClient {
   /// into secure storage and returns the token string.
   /// Returns a map with keys: 'token' (String?) and 'user' (Map?) on success.
   Future<Map<String, dynamic>?> login(String emailOrPhone, String password) async {
-    final response = await post('/users/public/login', data: {'emailorphone': emailOrPhone, 'password': password});
-    if (response.statusCode == 200) {
-      final data = response.data;
-      final parsed = _parseAuthResponse(data);
-      final token = parsed['token'] as String?;
-      final user = parsed['user'] as Map<String, dynamic>?;
-      if (token != null && token.isNotEmpty) {
-        await _safeWrite('access_token', token);
+    try {
+      final payload = {'emailorphone': emailOrPhone, 'password': password};
+      // avoid logging password in plain text; log only the field exists
+      log('Login request -> /users/public/login payload keys: ${payload.keys}');
+      final response = await post('/users/public/login', data: payload);
+      final status = response.statusCode ?? 0;
+      if (status >= 200 && status < 300) {
+        final data = response.data;
+        final parsed = _parseAuthResponse(data);
+        final token = parsed['token'] as String?;
+        final user = parsed['user'] as Map<String, dynamic>?;
+        if (token != null && token.isNotEmpty) {
+          await _safeWrite('access_token', token);
+        }
+        // also check top-level refresh token keys
+        final topLevelRefresh = (data is Map) ? (data['refresh_token'] ?? data['refreshToken']) : null;
+        final refresh = user != null ? (user['refresh_token'] ?? user['refreshToken'] ?? user['refresh'] ?? topLevelRefresh) : topLevelRefresh;
+        if (refresh != null && refresh.toString().isNotEmpty) {
+          await _safeWrite('refresh_token', refresh.toString());
+        }
+        return {'token': token, 'user': user};
+      } else {
+        throw Exception('Login failed: ${response.statusCode} ${response.data}');
       }
-      // persist refresh token if backend returned it inside user map
-      final refresh = user != null ? (user['refresh_token'] ?? user['refreshToken'] ?? user['refresh']) : null;
-      if (refresh != null && refresh.toString().isNotEmpty) {
-        await _safeWrite('refresh_token', refresh.toString());
-      }
-      return {'token': token, 'user': user};
+    } catch (e) {
+      log('Login error: $e', name: 'ApiClient');
+      rethrow; // or return null if you prefer to handle errors upstream
     }
-    throw Exception('Login failed: ${response.statusCode}');
   }
 
   /// Register a new user. On success, saves access_token if provided and
