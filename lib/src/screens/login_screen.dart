@@ -15,6 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _loading = false;
+  String _lastApiLog = '';
 
   bool get _canSubmit => _emailController.text.isNotEmpty && _passwordController.text.isNotEmpty && !_loading;
 
@@ -23,13 +24,19 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _loading = true);
     try {
       final client = ApiClient.create();
+      // capture request payload for logging
+      final payload = {'emailorphone': _emailController.text.trim(), 'password': _passwordController.text};
+      debugPrint('Attempting login with payload: $payload');
       final result = await client.login(_emailController.text.trim(), _passwordController.text);
       setState(() => _loading = false);
+      // Build a readable log for the UI
+      _lastApiLog = 'Request: /users/public/login\nPayload: $payload\nResult: ${result ?? 'null'}';
+      if (!mounted) return;
       if (result != null && result['token'] != null) {
         final user = result['user'] as Map<String, dynamic>?;
         final role = user != null && user['role'] != null ? user['role'].toString() : 'user';
-        if (!mounted) return;
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => DashboardScreen(role: role)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login success. Role: $role')));
+        // intentionally do NOT navigate to dashboard — keep user on login screen so logs can be inspected
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Login failed: no token')));
       }
@@ -38,6 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // log full error and stacktrace to help diagnose NotInitializedError
       debugPrint('Login error: $e');
       debugPrint('$st');
+      _lastApiLog = 'Request: /users/public/login\nPayload: {emailorphone: ${_emailController.text.trim()}}\nError: $e\nStack: $st';
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login error: ${e.runtimeType}: ${e.toString()}')));
     }
   }
@@ -73,6 +81,23 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RegisterScreen())),
               child: const Text('Don\'t have an account? Register'),
             ),
+            const SizedBox(height: 12),
+            // Display last API log for debugging
+            if (_lastApiLog.isNotEmpty) ...[
+              const Divider(),
+              const SizedBox(height: 8),
+              Text('Last API log:', style: Theme.of(context).textTheme.caption),
+              const SizedBox(height: 4),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(8),
+                color: Colors.black12,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Text(_lastApiLog, style: const TextStyle(fontSize: 12, fontFamily: 'monospace')),
+                ),
+              ),
+            ],
           ],
         ),
       ),

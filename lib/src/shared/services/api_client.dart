@@ -12,6 +12,7 @@ class ApiClient {
     _dio.options.baseUrl = dotenv.env['API_BASE_URL'] ?? 'https://backend.divyangsarthi.in';
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
+        // attach token if available
         try {
           final token = await _safeRead('access_token');
           if (token != null && token.isNotEmpty) {
@@ -20,9 +21,36 @@ class ApiClient {
         } catch (e) {
           // don't block the request on storage failures; continue without token
         }
+
+        // Log request details for debugging (payload, headers)
+        try {
+          debugPrint('API Request --> ${options.method.toUpperCase()} ${options.uri.toString()}');
+          debugPrint('Request headers: ${options.headers}');
+          debugPrint('Request data: ${options.data}');
+        } catch (_) {}
+
         return handler.next(options);
       },
+      onResponse: (response, handler) async {
+        // Log response details
+        try {
+          debugPrint('API Response <-- ${response.requestOptions.method.toUpperCase()} ${response.requestOptions.uri.toString()}');
+          debugPrint('Status: ${response.statusCode}');
+          debugPrint('Response data: ${response.data}');
+        } catch (_) {}
+        return handler.next(response);
+      },
       onError: (err, handler) async {
+        // Log error details
+        try {
+          final req = err.requestOptions;
+          debugPrint('API Error XX ${req.method.toUpperCase()} ${req.uri.toString()}');
+          debugPrint('Error message: ${err.message}');
+          if (err.response != null) {
+            debugPrint('Error status: ${err.response?.statusCode}');
+            debugPrint('Error response data: ${err.response?.data}');
+          }
+        } catch (_) {}
         // TODO: implement refresh token flow using users/public/getaccesstoken
         return handler.next(err);
       },
