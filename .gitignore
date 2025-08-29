@@ -1,0 +1,17 @@
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.pub/
+build/
+.idea/
+.vscode/
+*.iml
+*.lock
+# macOS
+.DS_Store
+# Android
+**/android/.gradle/
+**/android/local.properties
+# Secrets
+.env
+
