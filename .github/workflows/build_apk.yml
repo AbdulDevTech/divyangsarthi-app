@@ -25,10 +25,21 @@ jobs:
 
       - name: Find Flutter project root
         run: |
-          echo "Looking for pubspec.yaml..."
-          P=$(find . -name pubspec.yaml -print -quit | xargs -r dirname || true)
+          echo "Looking for pubspec.yaml in common locations..."
+          if [ -f ./pubspec.yaml ]; then
+            P='.'
+          elif [ -f ./divyangsarthi-app/pubspec.yaml ]; then
+            P='./divyangsarthi-app'
+          elif [ -f ./app/pubspec.yaml ]; then
+            P='./app'
+          else
+            # fallback to find as last resort
+            P=$(find . -name pubspec.yaml -print -quit | xargs -r dirname || true)
+          fi
           if [ -z "$P" ]; then
-            echo "No pubspec.yaml found; defaulting to repo root"
+            echo "No pubspec.yaml found in repo; listing workspace for debugging:"
+            ls -la || true
+            echo "Defaulting PROJECT_DIR to repo root '.'"
             P='.'
           fi
           echo "PROJECT_DIR=$P" >> $GITHUB_ENV
