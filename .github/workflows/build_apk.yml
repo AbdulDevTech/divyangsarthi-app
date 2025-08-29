@@ -45,6 +45,29 @@ jobs:
           echo "PROJECT_DIR=$P" >> $GITHUB_ENV
           echo "Project dir set to: $P"
 
+      - name: Copy .env.sample to .env (if present)
+        run: |
+          echo "PROJECT_DIR=$PROJECT_DIR"
+          if [ -f "$GITHUB_WORKSPACE/.env.sample" ]; then
+            echo "Found .env.sample at repo root; copying to $PROJECT_DIR/.env"
+            cp "$GITHUB_WORKSPACE/.env.sample" "$PROJECT_DIR/.env"
+            echo "Copied .env.sample to $PROJECT_DIR/.env"
+          else
+            echo ".env.sample not found in repo root; skipping"
+          fi
+
+      - name: Populate .env from GitHub Secret (if set)
+        run: |
+          echo "PROJECT_DIR=$PROJECT_DIR"
+          echo "${{ secrets.divyangsarthi_codebase }}" > "$PROJECT_DIR/.env.tmp" || true
+          if [ -s "$PROJECT_DIR/.env.tmp" ]; then
+            mv "$PROJECT_DIR/.env.tmp" "$PROJECT_DIR/.env"
+            echo "Wrote secret to $PROJECT_DIR/.env"
+          else
+            echo "GitHub secret 'divyangsarthi_codebase' not set or empty; skipping"
+            rm -f "$PROJECT_DIR/.env.tmp" || true
+          fi
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
