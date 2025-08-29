@@ -7,6 +7,19 @@ on:
 
 env:
   FLUTTER_CHANNEL: 'stable'
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  # Recommended: pin a concrete Flutter SDK to avoid resolution problems.
+  # Update this value to a specific version when you want reproducible builds.
+  FLUTTER_VERSION: '3.13.0' # <- change to a specific version compatible with your project
+  # Alternative: use 'latest' to always install the newest release:
+  # FLUTTER_VERSION: 'latest'
 
 jobs:
   build-apk:
@@ -22,10 +35,18 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-      - name: Setup Flutter
+      - name: Setup Flutter (subosito/flutter-action@v2) - pinned version
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          # cache: true  # uncomment to enable action caching of Flutter SDK (can speed up runs)
+
+      - name: Debug: show installed flutter and env
+        run: |
+          echo "FLUTTER_VERSION=${{ env.FLUTTER_VERSION }}"
+          flutter --version || true
+          which flutter || true
+          ls -la ${{ runner.temp }} || true
 
       - name: Install dependencies
         run: flutter pub get
@@ -38,3 +59,11 @@ jobs:
         with:
           name: app-release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+
+# Notes:
+# - If you want reproducible builds, pin FLUTTER_VERSION to a specific published version (recommended).
+# - If you prefer automatic updates set FLUTTER_VERSION: 'latest' (may cause unexpected changes).
+# - If you still see "Unable to determine Flutter version for channel" errors:
+#    * Try pinning to a specific version (as above).
+#    * Ensure GitHub Actions runners have network access (transient network issues can cause resolution failures).
+#    * Consider switching to a different setup action (example: subosito is common, but other community/setup-flutter actions exist).
