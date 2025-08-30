@@ -10,8 +10,8 @@ class SplashScreen extends StatefulWidget {
 
   const SplashScreen({
     super.key,
-    this.animationDuration = const Duration(milliseconds: 900),
-    this.exitDuration = const Duration(milliseconds: 400),
+  this.animationDuration = const Duration(milliseconds: 2400),
+  this.exitDuration = const Duration(milliseconds: 700),
   });
 
   @override
@@ -63,8 +63,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     // Use the provided CSS-like gradient for the background
     final gradient = const LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
       colors: [Color(0xFF020024), Color(0xFF090979), Color(0xFF00D4FF)],
       stops: [0.0, 0.54, 1.0],
     );
