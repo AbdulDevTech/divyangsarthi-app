@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../shared/services/api_client.dart';
 import 'dashboard_screen.dart';
 import 'login_screen.dart';
+import '../widgets/header_logo.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -119,7 +120,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Text('Create an account', style: Theme.of(context).textTheme.headline6),
+                            HeaderLogo(title: 'Create an account'),
                             const SizedBox(height: 8),
                             TextField(controller: _nameController, decoration: InputDecoration(prefixIcon: const Icon(Icons.person_outline), labelText: 'Name', errorText: _nameError, filled: true, fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.98), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none)), onChanged: (v) { _validateName(v); setState(() {}); }),
                             const SizedBox(height: 8),

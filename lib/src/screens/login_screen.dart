@@ -4,6 +4,7 @@ import 'home_screen.dart';
 import 'register_screen.dart';
 import 'dashboard_screen.dart';
 import 'package:flutter/services.dart';
+import '../widgets/header_logo.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -164,13 +165,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.stretch,
                                     children: [
                                       // header
-                                      Row(
-                                        children: [
-                                          Image.asset('assets/images/logo.png', height: 42, errorBuilder: (c, e, s) => const SizedBox()),
-                                          const SizedBox(width: 12),
-                                          Text('Welcome, let\'s get started!', style: Theme.of(context).textTheme.headline6),
-                                        ],
-                                      ),
+                                      HeaderLogo(title: "Welcome, let's get started!"),
                                       const SizedBox(height: 12),
                                       Text('Please use your credentials to login.', style: Theme.of(context).textTheme.bodyText2),
                                       const SizedBox(height: 18),
