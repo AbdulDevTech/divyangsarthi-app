@@ -1,8 +1,3 @@
-  /// Logout: clear all tokens from secure storage and memory
-  Future<void> logout() async {
-    await _safeWrite('access_token', null);
-    await _safeWrite('refresh_token', null);
-  }
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -109,6 +104,15 @@ class ApiClient {
     dio.options.connectTimeout = const Duration(seconds: 15);
     dio.options.receiveTimeout = const Duration(seconds: 30);
     return ApiClient._internal(dio);
+  }
+
+  /// Public helper to get the current access token (if any).
+  Future<String?> getAccessToken() async => _safeRead('access_token');
+
+  /// Logout: clear all tokens from secure storage and memory
+  Future<void> logout() async {
+    await _safeWrite('access_token', null);
+    await _safeWrite('refresh_token', null);
   }
 
   Future<Response> post(String path, {dynamic data, Options? options}) {

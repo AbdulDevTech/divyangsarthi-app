@@ -20,8 +20,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _checkAuthAndNavigate() async {
     await Future.delayed(const Duration(milliseconds: 500));
-    final client = ApiClient.create();
-    final token = await client._safeRead('access_token');
+  final client = ApiClient.create();
+  final token = await client.getAccessToken();
     if (!mounted) return;
     if (token != null && token.isNotEmpty) {
       // Optionally, fetch user role from storage or API

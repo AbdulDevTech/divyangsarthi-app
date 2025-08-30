@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _validateEmail(String value) {
     if (value.isEmpty) {
       _emailError = 'Email or phone is required';
-    } else if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}\$').hasMatch(value) && !RegExp(r'^\d{10,}\$').hasMatch(value)) {
+  } else if (!RegExp(r'^[\w\-.]+@([\w\-]+\.)+[\w\-]{2,4}').hasMatch(value) && !RegExp(r'^\d{10,}').hasMatch(value)) {
       _emailError = 'Enter a valid email or phone';
     } else {
       _emailError = null;
