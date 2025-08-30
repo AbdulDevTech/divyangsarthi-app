@@ -1,3 +1,8 @@
+  /// Logout: clear all tokens from secure storage and memory
+  Future<void> logout() async {
+    await _safeWrite('access_token', null);
+    await _safeWrite('refresh_token', null);
+  }
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
