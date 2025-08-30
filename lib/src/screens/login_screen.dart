@@ -89,78 +89,222 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                labelText: 'Email or phone',
-                errorText: _emailError,
-              ),
-              keyboardType: TextInputType.emailAddress,
-              onChanged: (v) {
-                _validateEmail(v);
-                setState(() {});
-              },
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                errorText: _passwordError,
-                suffixIcon: IconButton(
-                  icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
-                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 900;
+          return SafeArea(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1200),
+                  child: isWide
+                      ? Row(
+                          children: [
+                            // Left illustration card
+                            Expanded(
+                              flex: 5,
+                              child: Card(
+                                color: Theme.of(context).colorScheme.primary,
+                                elevation: 8,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(28.0),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      // Illustration placeholder (image will be added later)
+                                      Expanded(
+                                        child: Center(
+                                          child: Container(
+                                            width: double.infinity,
+                                            margin: const EdgeInsets.symmetric(horizontal: 12),
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.primaryContainer],
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                              ),
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            padding: const EdgeInsets.all(24),
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Icon(Icons.school, size: 110, color: Colors.white70),
+                                                const SizedBox(height: 12),
+                                                Text('Illustration placeholder', style: Theme.of(context).textTheme.subtitle1?.copyWith(color: Colors.white70)),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        'Knowledge Unleashed, Virtually Limitless',
+                                        style: Theme.of(context).textTheme.headline6?.copyWith(color: Colors.white, fontWeight: FontWeight.w600),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 28),
+                            // Right form card
+                            Expanded(
+                              flex: 4,
+                              child: Card(
+                                elevation: 6,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24.0),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      // header
+                                      Row(
+                                        children: [
+                                          Image.asset('assets/images/logo.png', height: 42, errorBuilder: (c, e, s) => const SizedBox()),
+                                          const SizedBox(width: 12),
+                                          Text('Welcome, let\'s get started!', style: Theme.of(context).textTheme.headline6),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text('Please use your credentials to login.', style: Theme.of(context).textTheme.bodyText2),
+                                      const SizedBox(height: 18),
+                                      // email
+                                      TextField(
+                                        controller: _emailController,
+                                        decoration: InputDecoration(
+                                          prefixIcon: const Icon(Icons.person_outline),
+                                          labelText: 'Enter email or Phone number',
+                                          errorText: _emailError,
+                                          filled: true,
+                                          fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.98),
+                                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                                        ),
+                                        keyboardType: TextInputType.emailAddress,
+                                        onChanged: (v) {
+                                          _validateEmail(v);
+                                          setState(() {});
+                                        },
+                                      ),
+                                      const SizedBox(height: 12),
+                                      // password
+                                      TextField(
+                                        controller: _passwordController,
+                                        decoration: InputDecoration(
+                                          prefixIcon: const Icon(Icons.lock_outline),
+                                          labelText: 'Password',
+                                          errorText: _passwordError,
+                                          filled: true,
+                                          fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.98),
+                                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                                          suffixIcon: IconButton(
+                                            icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                          ),
+                                        ),
+                                        obscureText: _obscurePassword,
+                                        onChanged: (v) {
+                                          _validatePassword(v);
+                                          setState(() {});
+                                        },
+                                      ),
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: TextButton(onPressed: _forgotPassword, child: const Text('Forgot password?')),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: FilledButton(
+                                              onPressed: _canSubmit ? _login : null,
+                                              child: _loading ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Text('Login'),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          OutlinedButton(
+                                            onPressed: () {/* guest login action */},
+                                            child: const Text('Guest Login'),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                        const Text('Not a member yet? '),
+                                        TextButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RegisterScreen())), child: const Text('Register')),
+                                      ]),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              Card(
+                                color: Theme.of(context).colorScheme.primary,
+                                elevation: 6,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20.0),
+                                  child: Container(
+                                    height: 220,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.primaryContainer], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Center(child: Icon(Icons.school, size: 90, color: Colors.white70)),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 18),
+                              Card(
+                                elevation: 6,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      Text('Welcome, let\'s get started!', style: Theme.of(context).textTheme.headline6),
+                                      const SizedBox(height: 12),
+                                      TextField(
+                                        controller: _emailController,
+                                        decoration: InputDecoration(prefixIcon: const Icon(Icons.person_outline), labelText: 'Enter email or Phone number', errorText: _emailError, filled: true, fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.98), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none)),
+                                        onChanged: (v) { _validateEmail(v); setState(() {}); },
+                                      ),
+                                      const SizedBox(height: 8),
+                                      TextField(
+                                        controller: _passwordController,
+                                        decoration: InputDecoration(prefixIcon: const Icon(Icons.lock_outline), labelText: 'Password', errorText: _passwordError, filled: true, fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.98), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none), suffixIcon: IconButton(icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off), onPressed: () => setState(() => _obscurePassword = !_obscurePassword))),
+                                        obscureText: _obscurePassword,
+                                        onChanged: (v) { _validatePassword(v); setState(() {}); },
+                                      ),
+                                      const SizedBox(height: 12),
+                                      FilledButton(onPressed: _canSubmit ? _login : null, child: const Text('Login')),
+                                      const SizedBox(height: 8),
+                                      OutlinedButton(onPressed: () {}, child: const Text('Guest Login')),
+                                      const SizedBox(height: 8),
+                                      Row(mainAxisAlignment: MainAxisAlignment.center, children: [ const Text('Not a member yet? '), TextButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RegisterScreen())), child: const Text('Register')) ]),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                 ),
               ),
-              obscureText: _obscurePassword,
-              onChanged: (v) {
-                _validatePassword(v);
-                setState(() {});
-              },
             ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: _forgotPassword,
-                child: const Text('Forgot Password?'),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _canSubmit ? _login : null,
-                child: _loading ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Login'),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextButton(
-              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RegisterScreen())),
-              child: const Text("Don't have an account? Register"),
-            ),
-            const SizedBox(height: 12),
-            if (_lastApiLog.isNotEmpty) ...[
-              const Divider(),
-              const SizedBox(height: 8),
-              Text('Last API log:', style: Theme.of(context).textTheme.caption),
-              const SizedBox(height: 4),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(8),
-                color: Colors.black12,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Text(_lastApiLog, style: const TextStyle(fontSize: 12, fontFamily: 'monospace')),
-                ),
-              ),
-            ],
-          ],
-        ),
+          );
+        },
       ),
     );
   }

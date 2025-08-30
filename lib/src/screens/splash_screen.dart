@@ -61,12 +61,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    // Use the provided CSS-like gradient for the background
-    final gradient = const LinearGradient(
+    // Derive gradient from the theme so the splash matches the app's primary color scheme
+    final scheme = Theme.of(context).colorScheme;
+    final gradient = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [Color(0xFF020024), Color(0xFF090979), Color(0xFF00D4FF)],
-      stops: [0.0, 0.54, 1.0],
+      colors: [scheme.primary, scheme.primaryContainer, scheme.secondary],
+      stops: const [0.0, 0.54, 1.0],
     );
 
     return Scaffold(
