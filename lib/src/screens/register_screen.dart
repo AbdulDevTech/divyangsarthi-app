@@ -87,60 +87,137 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 900),
-              child: Card(
-                elevation: 6,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 5,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Container(
-                            height: 360,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.primaryContainer], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                              borderRadius: BorderRadius.circular(8),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 900;
+          return SafeArea(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1200),
+                  child: isWide
+                      ? Row(
+                          children: [
+                            Expanded(
+                              flex: 5,
+                              child: Card(
+                                color: Theme.of(context).colorScheme.primary,
+                                elevation: 8,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(28.0),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: Center(
+                                          child: Container(
+                                            width: double.infinity,
+                                            margin: const EdgeInsets.symmetric(horizontal: 12),
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.primaryContainer],
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                              ),
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            padding: const EdgeInsets.all(24),
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: const [
+                                                Icon(Icons.school, size: 120, color: Colors.white70),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
-                            child: const Center(child: Icon(Icons.school, size: 120, color: Colors.white70)),
+                            const SizedBox(width: 28),
+                            Expanded(
+                              flex: 4,
+                              child: Card(
+                                elevation: 6,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      HeaderLogo(title: 'Create an account'),
+                                      const SizedBox(height: 12),
+                                      TextField(controller: _nameController, decoration: InputDecoration(prefixIcon: Icon(Icons.person_outline, color: Theme.of(context).colorScheme.onSurface), labelText: 'Name', errorText: _nameError, filled: true, fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.98), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none)), onChanged: (v) { _validateName(v); setState(() {}); }),
+                                      const SizedBox(height: 12),
+                                      TextField(controller: _emailController, decoration: InputDecoration(prefixIcon: Icon(Icons.email_outlined, color: Theme.of(context).colorScheme.onSurface), labelText: 'Email', errorText: _emailError, filled: true, fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.98), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none)), keyboardType: TextInputType.emailAddress, onChanged: (v) { _validateEmail(v); setState(() {}); }),
+                                      const SizedBox(height: 12),
+                                      TextField(controller: _passwordController, decoration: InputDecoration(prefixIcon: Icon(Icons.lock_outline, color: Theme.of(context).colorScheme.onSurface), labelText: 'Password', errorText: _passwordError, filled: true, fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.98), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none), suffixIcon: IconButton(icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off, color: Theme.of(context).colorScheme.onSurface), onPressed: () => setState(() => _obscurePassword = !_obscurePassword))), obscureText: _obscurePassword, onChanged: (v) { _validatePassword(v); setState(() {}); }),
+                                      const SizedBox(height: 12),
+                                      FilledButton(onPressed: _canSubmit ? _register : null, child: _loading ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Text('Register')),
+                                      const SizedBox(height: 12),
+                                      Row(mainAxisAlignment: MainAxisAlignment.center, children: [ const Text('Already a member? '), TextButton(onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen())), child: const Text('Login')) ]),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              Card(
+                                color: Theme.of(context).colorScheme.primary,
+                                elevation: 6,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20.0),
+                                  child: Container(
+                                    height: 220,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.primaryContainer], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Center(child: Icon(Icons.school, size: 90, color: Colors.white70)),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 18),
+                              Card(
+                                elevation: 6,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      HeaderLogo(title: 'Create an account'),
+                                      const SizedBox(height: 12),
+                                      TextField(controller: _nameController, decoration: InputDecoration(prefixIcon: Icon(Icons.person_outline, color: Theme.of(context).colorScheme.onSurface), labelText: 'Name', errorText: _nameError, filled: true, fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.98), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none)), onChanged: (v) { _validateName(v); setState(() {}); }),
+                                      const SizedBox(height: 8),
+                                      TextField(controller: _emailController, decoration: InputDecoration(prefixIcon: Icon(Icons.email_outlined, color: Theme.of(context).colorScheme.onSurface), labelText: 'Email', errorText: _emailError, filled: true, fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.98), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none)), keyboardType: TextInputType.emailAddress, onChanged: (v) { _validateEmail(v); setState(() {}); }),
+                                      const SizedBox(height: 8),
+                                      TextField(controller: _passwordController, decoration: InputDecoration(prefixIcon: Icon(Icons.lock_outline, color: Theme.of(context).colorScheme.onSurface), labelText: 'Password', errorText: _passwordError, filled: true, fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.98), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none), suffixIcon: IconButton(icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off, color: Theme.of(context).colorScheme.onSurface), onPressed: () => setState(() => _obscurePassword = !_obscurePassword))), obscureText: _obscurePassword, onChanged: (v) { _validatePassword(v); setState(() {}); }),
+                                      const SizedBox(height: 12),
+                                      FilledButton(onPressed: _canSubmit ? _register : null, child: const Text('Register')),
+                                      const SizedBox(height: 8),
+                                      Row(mainAxisAlignment: MainAxisAlignment.center, children: [ const Text('Already a member? '), TextButton(onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen())), child: const Text('Login')) ]),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        flex: 4,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            HeaderLogo(title: 'Create an account'),
-                            const SizedBox(height: 8),
-                            TextField(controller: _nameController, decoration: InputDecoration(prefixIcon: const Icon(Icons.person_outline), labelText: 'Name', errorText: _nameError, filled: true, fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.98), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none)), onChanged: (v) { _validateName(v); setState(() {}); }),
-                            const SizedBox(height: 8),
-                            TextField(controller: _emailController, decoration: InputDecoration(prefixIcon: const Icon(Icons.email_outlined), labelText: 'Email', errorText: _emailError, filled: true, fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.98), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none)), keyboardType: TextInputType.emailAddress, onChanged: (v) { _validateEmail(v); setState(() {}); }),
-                            const SizedBox(height: 8),
-                            TextField(controller: _passwordController, decoration: InputDecoration(prefixIcon: const Icon(Icons.lock_outline), labelText: 'Password', errorText: _passwordError, filled: true, fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.98), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none), suffixIcon: IconButton(icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off), onPressed: () => setState(() => _obscurePassword = !_obscurePassword))), obscureText: _obscurePassword, onChanged: (v) { _validatePassword(v); setState(() {}); }),
-                            const SizedBox(height: 12),
-                            FilledButton(onPressed: _canSubmit ? _register : null, child: _loading ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Text('Register')),
-                            const SizedBox(height: 8),
-                            Row(mainAxisAlignment: MainAxisAlignment.center, children: [ const Text('Already a member? '), TextButton(onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen())), child: const Text('Login')) ]),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

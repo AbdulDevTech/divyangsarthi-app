@@ -165,15 +165,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.stretch,
                                     children: [
                                       // header
-                                      HeaderLogo(title: "Welcome, let's get started!"),
+                                        HeaderLogo(title: "Welcome, let's get started!"),
                                       const SizedBox(height: 12),
                                       Text('Please use your credentials to login.', style: Theme.of(context).textTheme.bodyText2),
                                       const SizedBox(height: 18),
                                       // email
-                                      TextField(
-                                        controller: _emailController,
-                                        decoration: InputDecoration(
-                                          prefixIcon: const Icon(Icons.person_outline),
+                                        TextField(
+                                          controller: _emailController,
+                                          decoration: InputDecoration(
+                                            prefixIcon: Icon(Icons.person_outline, color: Theme.of(context).colorScheme.onSurface),
                                           labelText: 'Enter email or Phone number',
                                           errorText: _emailError,
                                           filled: true,
@@ -188,17 +188,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                       const SizedBox(height: 12),
                                       // password
-                                      TextField(
-                                        controller: _passwordController,
-                                        decoration: InputDecoration(
-                                          prefixIcon: const Icon(Icons.lock_outline),
+                                        TextField(
+                                          controller: _passwordController,
+                                          decoration: InputDecoration(
+                                            prefixIcon: Icon(Icons.lock_outline, color: Theme.of(context).colorScheme.onSurface),
                                           labelText: 'Password',
                                           errorText: _passwordError,
                                           filled: true,
                                           fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.98),
                                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
                                           suffixIcon: IconButton(
-                                            icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                                              icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off, color: Theme.of(context).colorScheme.onSurface),
                                             onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                                           ),
                                         ),
@@ -268,7 +268,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.stretch,
                                     children: [
-                                      Text('Welcome, let\'s get started!', style: Theme.of(context).textTheme.headline6),
+                                        HeaderLogo(title: "Welcome, let's get started!"),
                                       const SizedBox(height: 12),
                                       TextField(
                                         controller: _emailController,

@@ -33,7 +33,21 @@ class DashboardScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text('Dashboard - ${_displayRole(role)}')),
-      body: Padding(padding: const EdgeInsets.all(16.0), child: body),
+      body: Padding(padding: const EdgeInsets.all(16.0), child: Column(children: [
+        // Top statistics row
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _statCard('Active Users', '1,234', Icons.people, context),
+            _statCard('Courses', '42', Icons.menu_book, context),
+            _statCard('Revenue', '₹12.3k', Icons.attach_money, context),
+            _statCard('Alerts', '3', Icons.notifications, context),
+          ],
+        ),
+        const SizedBox(height: 18),
+        // Role-specific content below
+        Expanded(child: body),
+      ])),
     );
   }
 
@@ -53,8 +67,8 @@ class DashboardScreen extends StatelessWidget {
         children: const [
           Text('Admin Panel', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           SizedBox(height: 12),
-          Text('• Manage users'),
-          Text('• View system metrics'),
+          Text('• Manage users'),
+          Text('• View system metrics'),
         ],
       );
 
@@ -113,8 +127,8 @@ class DashboardScreen extends StatelessWidget {
         children: const [
           Text('User Dashboard', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           SizedBox(height: 12),
-          Text('• View your profile'),
-          Text('• Browse content'),
+          Text('• View your profile'),
+          Text('• Browse content'),
         ],
       );
 
@@ -157,5 +171,32 @@ class DashboardScreen extends StatelessWidget {
           Text('• Approve requests'),
         ],
       );
+
+  Widget _statCard(String title, String value, IconData icon, BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Expanded(
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          child: Row(
+            children: [
+              CircleAvatar(backgroundColor: scheme.primaryContainer, child: Icon(icon, color: scheme.onPrimary)),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+                  const SizedBox(height: 6),
+                  Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: scheme.primary)),
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
 }
